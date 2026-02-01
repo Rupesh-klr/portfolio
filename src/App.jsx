@@ -37,9 +37,9 @@ const App = () => {
       setTimeout(() => {
         setTimerKey((prev) => prev + 1); // Increment key to force re-render
         setIsLoading(false);             // Hide loader
-      }, 2000); 
+      }, 1000); 
 
-    }, 0.1 * 60 * 1000); // 6 Minutes
+    }, 5 * 60 * 1000); // 6 Minutes
 
     return () => clearInterval(interval);
   }, []);
