@@ -47,19 +47,42 @@ const HighlightPhrase = ({ children, delay }) => (
     {children}
   </motion.span>
 );
-
 const ServiceCard = ({ index, title, icon }) => (
-  <Tilt className='xs:w-[250px] w-full'>
+  <Tilt 
+    // 1. WIDTH ADJUSTMENTS:
+    // w-full on mobile
+    // sm:w-[130px] (Small screens)
+    // md:w-[180px] (Medium screens)
+    // lg:w-[250px] (Large screens - restoring original size)
+    className='w-full max-w-[230px] sm:max-w-[130px] md:w-[180px] lg:w-[250px]'
+  >
     <motion.div
       variants={fadeIn("right", "spring", index * 0.5, 0.75)}
       className='w-full green-pink-gradient p-[1px] rounded-[20px] shadow-card'
     >
       <div
         options={{ max: 45, scale: 1, speed: 450 }}
-        className='bg-tertiary rounded-[20px] py-5 px-12 min-h-[280px] flex justify-evenly items-center flex-col'
+        // 2. INTERNAL SPACING ADJUSTMENTS:
+        // sm:min-h-[200px] -> Shorter height for small cards
+        // sm:px-4 -> Less padding (so text fits in 130px)
+        // Standard (min-h-[280px] px-12) applies to large screens
+        className='bg-tertiary rounded-[20px] py-5 sm:py-4 px-12 sm:px-4 md:px-8 min-h-[280px] sm:min-h-[200px] md:min-h-[240px] flex justify-evenly items-center flex-col'
       >
-        <img src={icon} alt={title} className='w-16 h-16 object-contain' />
-        <h3 className='text-white text-[20px] font-bold text-center'>{title}</h3>
+        <img 
+          src={icon} 
+          alt={title} 
+          // 3. ICON SIZE ADJUSTMENTS:
+          // Smaller icon for small screens
+          className='w-16 h-16 sm:w-10 sm:h-10 md:w-12 md:h-12 object-contain' 
+        />
+
+        <h3 
+          // 4. TEXT SIZE ADJUSTMENTS:
+          // Smaller text for small screens
+          className='text-white text-[20px] sm:text-[14px] md:text-[18px] font-bold text-center'
+        >
+          {title}
+        </h3>
       </div>
     </motion.div>
   </Tilt>

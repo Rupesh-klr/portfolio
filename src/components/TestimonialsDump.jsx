@@ -1,7 +1,7 @@
 
-import GlowCard from "./GlowCard";
-import.meta.env.BASE_URL;
-import GlassRating from "./GlassRating";
+// import GlowCard from "./GlowCard";
+// import.meta.env.BASE_URL;
+// import GlassRating from "./GlassRating";
 
 const testimonials = [
   {
@@ -104,58 +104,276 @@ const testimonials = [
       "Starting as an intern, Rupesh quickly proved his capability to handle high volumes of open items with precision. He has a knack for finding root causes across all dimensions and taking quick, effective action. His work enriching our stack with Node.js and React has been invaluable. He manages to juggle many moving parts without dropping the ball. Keep doing the same good job, Rupesh!",
   },
 ];
+import React, { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import GlowCard from "./GlowCard";
+import GlassRating from "./GlassRating";
+// import { testimonials } from "../constants"; // Assuming your data is here
 
-// export { testimonialsKll };
-const TestimonialsDump = () => {
+// ==========================================
+// 1. CONFIGURATION (CONTROL CENTER)
+// ==========================================
+
+const LAYOUT_CONFIG = {
+  // Columns per screen size
+  columns: {
+    xs: 1, // Mobile
+    sm: 1, // Large Mobile
+    md: 2, // Tablet
+    lg: 3, // Desktop
+  },
+  // How many rows to show initially
+  defaultRows: 2, 
+  // Fallback value if calculation fails
+  fallback: 3, 
+};
+
+const TRUNCATE_CONFIG = {
+  // Number of words to show before cutting off
+  wordLimit: 15, 
+};
+
+// ==========================================
+// 2. HELPERS (LOGIC ENGINE)
+// ==========================================
+
+// Helper: Sanitize numbers
+const sanitizeValue = (val, fallback) => {
+  const parsed = parseFloat(val);
+  if (isNaN(parsed)) return fallback;
+  return Math.round(parsed);
+};
+
+// Helper: Sorting Logic (Ranked -> Pinned -> Rest)
+const getSortedTestimonials = (data) => {
+  // 1. Ranked: Has a valid 'rank' or 'id' number you want to prioritize
+  // (Assuming you might add a 'rank' property to your data later, otherwise skips)
+  const ranked = data
+    .filter(t => typeof t.rank === 'number')
+    .sort((a, b) => a.rank - b.rank);
+  
+  const rankedIds = new Set(ranked.map(t => t.name));
+
+  // 2. Pinned: 'isPinned' is true
+  const pinned = data.filter(t => 
+    t.isPinned === true && !rankedIds.has(t.name)
+  );
+  const pinnedIds = new Set(pinned.map(t => t.name));
+
+  // 3. Rest: Everything else
+  const rest = data.filter(t => 
+    !rankedIds.has(t.name) && !pinnedIds.has(t.name)
+  );
+
+  return [...ranked, ...pinned, ...rest];
+};
+
+// ==========================================
+// 3. SINGLE TESTIMONIAL CARD (HANDLES TRUNCATION)
+// ==========================================
+const TestimonialCard = ({ testimonial }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Logic: Split text into words
+  const words = testimonial.review.split(" ");
+  const isLongText = words.length > TRUNCATE_CONFIG.wordLimit;
+
+  // Calculate what text to show
+  const displayedText = isExpanded || !isLongText
+    ? testimonial.review
+    : words.slice(0, TRUNCATE_CONFIG.wordLimit).join(" ") + "...";
+
   return (
-    <section id="testimonials" className="flex-center sm:px-16 px-6 sm:py-16 py-10 max-w-7xl mx-auto relative z-0 ">
-      <div className=" h-full md:px-10 px-5">
-
-        <div className="flex flex-col items-center gap-5">
-          <div className="hero-badge">
-            <p>"⭐️ Endorsements from Leadership"</p>
-          </div>
-          <div>
-            <h1 className="font-semibold md:text-5xl text-3xl text-center">
-              "What People Say About Me?"
-            </h1>
-          </div>
+    <GlowCard 
+      glowColor={testimonial.color || "#804dee"} 
+      className="p-8 h-full flex flex-col justify-between"
+    >
+      <div>
+        {/* Rating Component */}
+        <div className="mb-4">
+           <GlassRating rating={testimonial.rating || 5} />
         </div>
 
-        <div className="lg:columns-3 md:columns-2 columns-1 mt-16 gap-5 space-y-5">
-      {testimonials.map((testimonial, index) => (
-        <GlowCard 
-          key={index} 
-          glowColor={testimonial.color || "#804dee"} // Pass custom color here
-          className="p-10 mb-5 break-inside-avoid-column"
-        >
-          {/* <div className="flex items-center gap-1 mb-5">
-            {Array.from({ length: 5 }, (_, i) => (
-              <img key={i} src={import.meta.env.BASE_URL + "images/star.png"} alt="star" className="w-5 h-5 opacity-80" />
-            ))}
-          </div> */}
-          {/* ✅ REPLACED THE OLD STAR LOOP WITH THIS */}
-          <GlassRating rating={testimonial.rating} />
-          <div className="mb-5">
-            <p className="text-gray-300 text-lg leading-relaxed">{testimonial.review}</p>
-          </div>
+        {/* Review Text with Animation */}
+        <motion.div layout className="mb-5">
+          <p className="text-gray-300 text-lg leading-relaxed">
+            "{displayedText}"
+          </p>
+          
+          {/* Read More / Show Less Button */}
+          {isLongText && (
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="mt-2 text-sm font-bold text-[#915EFF] hover:text-white transition-colors outline-none"
+            >
+              {isExpanded ? "Show Less" : "Read More"}
+            </button>
+          )}
+        </motion.div>
+      </div>
 
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gray-700 overflow-hidden">
-               {/* Placeholder for user image */}
-               <img key={testimonial.id} src={testimonial.imgPath} alt="client" className="w-full h-full object-cover" />
-            </div>
-            <div>
-              <p className="font-bold text-white">{testimonial.name}</p>
-              <p className="text-gray-500 text-sm">Verified User</p>
-            </div>
+      {/* User Info */}
+      <div className="flex items-center gap-4 pt-4 border-t border-white/10">
+        <div className="w-12 h-12 rounded-full bg-gray-700 overflow-hidden border border-white/20">
+           <img 
+             src={testimonial.imgPath} 
+             alt={testimonial.name} 
+             className="w-full h-full object-cover" 
+           />
+        </div>
+        <div>
+          <p className="font-bold text-white text-[16px]">{testimonial.name}</p>
+          <p className="text-gray-500 text-xs uppercase tracking-wider">
+            {testimonial.designation} • {testimonial.company}
+          </p>
+        </div>
+      </div>
+    </GlowCard>
+  );
+};
+
+// ==========================================
+// 4. MAIN COMPONENT (HANDLES GRID & LAYOUT)
+// ==========================================
+const Testimonials = () => {
+  const [isAllExpanded, setIsAllExpanded] = useState(false);
+  const [screenSize, setScreenSize] = useState("lg");
+
+  // 1. Screen Resize Listener
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 640) setScreenSize("xs");
+      else if (width < 768) setScreenSize("sm");
+      else if (width < 1024) setScreenSize("md");
+      else setScreenSize("lg");
+    };
+
+    handleResize(); 
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // 2. Sorting Data
+  const sortedTestimonials = useMemo(() => getSortedTestimonials(testimonials), []);
+
+  // 3. Grid Calculation
+  const columns = sanitizeValue(LAYOUT_CONFIG.columns[screenSize], LAYOUT_CONFIG.fallback);
+  const defaultRows = sanitizeValue(LAYOUT_CONFIG.defaultRows, 2);
+  const initialCount = columns * defaultRows;
+
+  // 4. Slice Data for View
+  const visibleTestimonials = isAllExpanded 
+    ? sortedTestimonials 
+    : sortedTestimonials.slice(0, initialCount);
+
+  return (
+    <section id="testimonials" className="flex-center sm:px-16 px-6 sm:py-16 py-10 max-w-7xl mx-auto relative z-0">
+      <div className="h-full md:px-10 px-5 w-full">
+
+        {/* Header */}
+        <div className="flex flex-col items-center gap-5 mb-16">
+          <div className="hero-badge">
+            <p className="text-sm font-medium">⭐️ Endorsements</p>
           </div>
-        </GlowCard>
-      ))}
-    </div>
+          <h1 className="font-semibold md:text-5xl text-3xl text-center text-white">
+            What People Say
+          </h1>
+        </div>
+
+        {/* GRID LAYOUT 
+            Using CSS Grid instead of Masonry (columns-3) because it handles 
+            "Rows" logic much better visually.
+        */}
+        <motion.div 
+          layout
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          <AnimatePresence>
+            {visibleTestimonials.map((testimonial, index) => (
+              <motion.div
+                layout
+                key={testimonial.name || index} // Use unique ID if available
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <TestimonialCard testimonial={testimonial} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
+
+        {/* View All Button */}
+        {sortedTestimonials.length > initialCount && (
+          <div className="w-full flex justify-center mt-12">
+            <button
+              onClick={() => setIsAllExpanded(!isAllExpanded)}
+              className="bg-[#915EFF] hover:bg-purple-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all active:scale-95 outline-none border border-white/10"
+            >
+              {isAllExpanded ? "Show Less" : "View All Reviews"}
+            </button>
+          </div>
+        )}
+
       </div>
     </section>
   );
 };
 
-export default TestimonialsDump;
+export default Testimonials;
+// // export { testimonialsKll };
+// const TestimonialsDump = () => {
+//   return (
+//     <section id="testimonials" className="flex-center sm:px-16 px-6 sm:py-16 py-10 max-w-7xl mx-auto relative z-0 ">
+//       <div className=" h-full md:px-10 px-5">
+
+//         <div className="flex flex-col items-center gap-5">
+//           <div className="hero-badge">
+//             <p>"⭐️ Endorsements from Leadership"</p>
+//           </div>
+//           <div>
+//             <h1 className="font-semibold md:text-5xl text-3xl text-center">
+//               "What People Say About Me?"
+//             </h1>
+//           </div>
+//         </div>
+
+//         <div className="lg:columns-3 md:columns-2 columns-1 mt-16 gap-5 space-y-5">
+//       {testimonials.map((testimonial, index) => (
+//         <GlowCard 
+//           key={index} 
+//           glowColor={testimonial.color || "#804dee"} // Pass custom color here
+//           className="p-10 mb-5 break-inside-avoid-column"
+//         >
+//           {/* <div className="flex items-center gap-1 mb-5">
+//             {Array.from({ length: 5 }, (_, i) => (
+//               <img key={i} src={import.meta.env.BASE_URL + "images/star.png"} alt="star" className="w-5 h-5 opacity-80" />
+//             ))}
+//           </div> */}
+//           {/* ✅ REPLACED THE OLD STAR LOOP WITH THIS */}
+//           <GlassRating rating={testimonial.rating} />
+//           <div className="mb-5">
+//             <p className="text-gray-300 text-lg leading-relaxed">{testimonial.review}</p>
+//           </div>
+
+//           <div className="flex items-center gap-3">
+//             <div className="w-10 h-10 rounded-full bg-gray-700 overflow-hidden">
+//                {/* Placeholder for user image */}
+//                <img key={testimonial.id} src={testimonial.imgPath} alt="client" className="w-full h-full object-cover" />
+//             </div>
+//             <div>
+//               <p className="font-bold text-white">{testimonial.name}</p>
+//               <p className="text-gray-500 text-sm">Verified User</p>
+//             </div>
+//           </div>
+//         </GlowCard>
+//       ))}
+//     </div>
+//       </div>
+//     </section>
+//   );
+// };
+
+// export default TestimonialsDump;

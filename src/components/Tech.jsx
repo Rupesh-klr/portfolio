@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 import BallCanvas from "./canvas/BallCanvas";
 import { SectionWrapper } from "../hoc";
@@ -215,22 +215,85 @@ const Skills = () => {
     </section>
   );
 };
-
-
+const BALLS_VISIBILITY_CONFIG = {
+  xs: false, // Mobile (< 450px) - Hidden (Recommended for performance)
+  sm: false, // Small (< 768px) - Hidden
+  md: true,  // Medium (< 1024px) - Visible
+  lg: true,  // Large (< 1280px) - Visible
+  xl: true,  // Extra Large (> 1280px) - Visible
+};
 const Tech = () => {
+  const [showBalls, setShowBalls] = useState(false);
+
+  // --- 2. SCREEN SIZE LISTENER ---
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      
+      // Determine current breakpoint
+      let currentBreakpoint = 'xl';
+      if (width < 450) currentBreakpoint = 'xs';
+      else if (width < 768) currentBreakpoint = 'sm';
+      else if (width < 1024) currentBreakpoint = 'md';
+      else if (width < 1280) currentBreakpoint = 'lg';
+
+      // Update state based on config
+      setShowBalls(BALLS_VISIBILITY_CONFIG[currentBreakpoint]);
+    };
+
+    // Run immediately on mount
+    handleResize();
+
+    // Add event listener for window resize
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup listener on unmount
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <div className='flex flex-row flex-wrap justify-center gap-10'>
+      {/* These components remain visible regardless of the ball config */}
       <LogoShowcase speed={15} />
       <LogoShowcase direction="right" speed={10} />
       <LogoShowcase direction="left" speed={20} />
+      
       <Skills />
-      {technologies.map((technology) => (
+
+      {/* --- 3. CONDITIONAL RENDERING OF 3D BALLS --- */}
+      {/* Only renders if showBalls is TRUE */}
+      {showBalls && technologies.map((technology) => (
         <div className='w-28 h-28' key={technology.name}>
           <BallCanvas icon={technology.icon} />
         </div>
       ))}
+      
+      {/* Optional: Message if balls are hidden (Debugging purposes) */}
+      {!showBalls && (
+         <div className="w-full text-center text-secondary text-sm hidden">
+            3D Tech Stack hidden on this device for performance.
+         </div>
+      )}
     </div>
   );
 };
 
 export default SectionWrapper(Tech, "");
+
+// const Tech = () => {
+//   return (
+//     <div className='flex flex-row flex-wrap justify-center gap-10'>
+//       <LogoShowcase speed={15} />
+//       <LogoShowcase direction="right" speed={10} />
+//       <LogoShowcase direction="left" speed={20} />
+//       <Skills />
+//       {technologies.map((technology) => (
+//         <div className='w-28 h-28' key={technology.name}>
+//           <BallCanvas icon={technology.icon} />
+//         </div>
+//       ))}
+//     </div>
+//   );
+// };
+
+// export default SectionWrapper(Tech, "");

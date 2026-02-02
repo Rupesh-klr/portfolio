@@ -188,7 +188,7 @@ const experiences = [
     company_name: "Lumen Technologies",
     icon: lumen, 
     iconBg: "#E6DEDD",
-    date: "Nov 2023 - Present",
+    date: "Nov 2023 - Sep 2025",
     points: [
       "Spearheaded the critical migration of legacy Virtual Machines (VMs) to Rancher-managed Kubernetes clusters, achieving 100% deliverable success rate ahead of strict deadlines. ",
       "Engineered high-performance CI/CD pipelines using Jenkins and Docker, integrating JMeter for automated load testing to ensure system stability under peak loads.",
@@ -269,6 +269,8 @@ const dummyUser = "https://randomuser.me/api/portraits/men/1.jpg";
 const projects = [
   {
     name: "Distributed Banking Core",
+    // displayProjectCount: 1,
+    isPinned: true,
     short_desc: "High-performance microservices system mimicking core banking operations.",
     period: 'April 2025 - May 2025',
     bullets: [
@@ -306,6 +308,8 @@ const projects = [
   },
   {
     name: "Telecom Network Optimizer",
+     displayProjectCount: 2,
+     isPinned: true,
     short_desc: "Algorithmic tool optimizing signal latency by 40% using Graph Theory.",
     description:
       "An advanced algorithmic tool for dynamic network routing. Developed a high-efficiency routing algorithm to calculate the shortest path between dynamic network nodes, optimizing signal latency by 40% using Graph Theory. Built a visualization tool to simulate real-time signal geometry.",
@@ -327,6 +331,8 @@ const projects = [
   {
     name: "Solar & EdTech SaaS",
     short_desc: "Unified multi-tenant platform handling dual business domains.",
+    displayProjectCount: 5,
+    isPinned: true,
     description:
       "A unified multi-tenant platform handling dual business domains. Architected a comprehensive SaaS platform featuring Role-Based Access Control (RBAC) and Google OAuth to securely manage distinct user personas. Designed a dual-domain database schema.",
     tags: [

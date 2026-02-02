@@ -1,9 +1,10 @@
-import React, { Suspense, useEffect, useState } from "react";
-import { Canvas } from "@react-three/fiber";
+import React, { Suspense, useEffect, useState, useRef } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Preload, useGLTF } from "@react-three/drei";
 
 import CanvasLoader from "../Loader";
 
+// 1. The 3D Model Component
 const Computers = ({ isMobile }) => {
   const computer = useGLTF("./desktop_pc/scene.gltf");
 
@@ -29,25 +30,56 @@ const Computers = ({ isMobile }) => {
   );
 };
 
+// 2. NEW COMPONENT: Controls logic extracted here
+// This runs INSIDE the canvas, so useFrame works.
+const CameraControls = () => {
+  const controlsRef = useRef();
+
+  useFrame((state) => {
+    if (controlsRef.current) {
+      // 1. Horizontal rotation is handled by autoRotate prop below
+      
+      // 2. Add custom vertical oscillation
+      const time = state.clock.getElapsedTime();
+      
+      // Calculate new polar angle
+      const targetAngle = (Math.PI / 2) + Math.sin(time * 0.5) * 0.5;
+      
+      // Apply the angle
+      controlsRef.current.setPolarAngle(targetAngle);
+      
+      controlsRef.current.update();
+    }
+  });
+
+  return (
+    <OrbitControls
+      ref={controlsRef}
+      enableZoom={false}
+      autoRotate
+      autoRotateSpeed={3.25}
+      // IMPORTANT: We must relax these limits so the script above can actually move the camera up and down.
+      // If we lock them to Math.PI/2, the setPolarAngle code above won't work.
+      maxPolarAngle={Math.PI} 
+      minPolarAngle={0}
+    />
+  );
+};
+
+// 3. Main Parent Component
 const ComputersCanvas = () => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Add a listener for changes to the screen size
     const mediaQuery = window.matchMedia("(max-width: 500px)");
-
-    // Set the initial value of the `isMobile` state variable
     setIsMobile(mediaQuery.matches);
 
-    // Define a callback function to handle changes to the media query
     const handleMediaQueryChange = (event) => {
       setIsMobile(event.matches);
     };
 
-    // Add the callback function as a listener for changes to the media query
     mediaQuery.addEventListener("change", handleMediaQueryChange);
 
-    // Remove the listener when the component is unmounted
     return () => {
       mediaQuery.removeEventListener("change", handleMediaQueryChange);
     };
@@ -58,17 +90,13 @@ const ComputersCanvas = () => {
       frameloop='demand'
       shadows
       dpr={[1, 2]}
-      camera={{ position: [20, 4, 5], fov: 25 }}
+      camera={{ position: [20, 3, 5], fov: 25 }}
       gl={{ preserveDrawingBuffer: true }}
     >
       <Suspense fallback={<CanvasLoader />}>
-        <OrbitControls
-          enableZoom={false}
-          autoRotate
-          autoRotateSpeed={0.25}
-          maxPolarAngle={Math.PI / 2}
-          minPolarAngle={Math.PI / 2}
-        />
+        {/* Render the extracted controls component here */}
+        <CameraControls />
+        
         <Computers isMobile={isMobile} />
       </Suspense>
 
