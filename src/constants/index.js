@@ -88,13 +88,15 @@ export const navLinks = [
       },
       { id: "socials", title: "Social Media", path: "#socials" },
       { id: "connect-hub", title: "Connection Hub", path: "#socials" },
+      { id: "my-details-all", title: "Connect+", path: "#", modelItem: true, modelData: { "name": "Rupesh", "roles": "software engineer", isComingSoon: true }, modelType: "my-details-compunetent", modelKey: "my-details-compunetent" },
     ],
   },
+  // ✅ YOUR NEW MODAL BUTTON
   { 
-    id: "my-details-all", 
+    id: "my-details-all-2", 
     title: "Connect+", 
     path: "#", 
-    modelItem: true, 
+    navModelItem: true, 
     modelType: "my-details-compunetent", // Matches logic below
     modelKey: "my-details-compunetent" 
   },

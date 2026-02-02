@@ -13,7 +13,8 @@ const Navbar = ({ onOpenModal }) => {
   const [scrolled, setScrolled] = useState(false);
   const [activeModal, setActiveModal] = useState(null); // 'my-details-compunetent' or null
   const handleNavClick = (nav) => {
-    if (nav.modelItem) {
+    console.log("Clicked nav:", nav);
+    if (nav.navModelItem && nav.modelType === "my-details-compunetent") {
       setActiveModal(nav.modelType);
     } else {
       // Handle standard scrolling...
@@ -68,7 +69,25 @@ const Navbar = ({ onOpenModal }) => {
                 } hover:text-white text-[18px] font-medium cursor-pointer relative group`}
               onClick={() => setActive(nav.title)}
             >
+              {nav.navModelItem ? (
+                <span
+                  className="hover:text-yellow text-[16px] font-medium block"
+                  onClick={(e) => {
+                    e.preventDefault(); // Stop page jump
+                    handleNavClick(nav);
+                    // Send data UP to App.jsx
+                    // onOpenModal(
+                    //   nav.modelType, 
+                    //   nav.modelKey, 
+                    //   nav.modelData
+                    // );
+                  }}
+                >
+                  {nav.title}
+                </span>
+              ) : ( 
               <a href={`#${nav.id}`}>{nav.title}</a>
+              )}
               {/* Dropdown Menu (Appears on Group Hover) */}
               {nav.children && (
                 <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-[#1d1836] rounded-xl shadow-card p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top z-50">
@@ -188,6 +207,7 @@ const Navbar = ({ onOpenModal }) => {
       {activeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="relative w-full max-w-4xl">
+            <h1>helllo</h1>
             
             {/* Close Button */}
             <button 

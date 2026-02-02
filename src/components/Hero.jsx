@@ -7,6 +7,8 @@ import { TypeAnimation } from 'react-type-animation';
 const Hero = () => {
   return (
     <section className={`relative w-full h-screen mx-auto`}>
+      {/* Added a 20px blank spacer before the hash-span as requested */}
+      <div className="w-full h-[20px]" />
       <span className='hash-span' id="home">
           &nbsp;
         </span>
