@@ -350,3 +350,26 @@ body {
 a, button, input, textarea, select {
   cursor: none !important;
 }
+/* 1. Global: Hide default browser scrollbar (Optional - Keeps the site looking like an 'app') */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent; 
+}
+
+/* 2. Specific: The "Sexy" Scrollbar for your Modal */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px; /* Width of the vertical scrollbar */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent; /* Makes the track invisible */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2); /* Subtle semi-transparent white */
+  border-radius: 20px; /* Round edges */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.5); /* Brighter when you hover over it */
+}

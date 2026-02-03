@@ -1,11 +1,10 @@
 import React from "react";
 import { motion } from "framer-motion";
-import BubbleLoader from "./BubbleLoader"; // Ensure this path is correct
+import BubbleLoader from "./BubbleLoader"; 
 
 const GlobalModal = ({ isOpen, onClose, type, data }) => {
   if (!isOpen) return null;
 
-  // Helper to determine the Modal Title
   const getModalTitle = () => {
     if (type === "legal") return data?.title || "Legal";
     if (type === "resume-sample-template") return "Resume Collection";
@@ -13,15 +12,27 @@ const GlobalModal = ({ isOpen, onClose, type, data }) => {
   };
 
   return (
-    // Backdrop
-    <div className="fixed inset-0 z-[101] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    // Backdrop - Flexbox centering handles the positioning for the smaller sizes
+    <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center">
       
       {/* Modal Container */}
       <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
+        initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.8, opacity: 0 }}
-        className="bg-[#1d1836] w-[90%] max-w-4xl p-8 rounded-2xl relative border border-white/10 shadow-card max-h-[90vh] flex flex-col"
+        exit={{ scale: 0.9, opacity: 0 }}
+        
+        // --- RESPONSIVE POSITIONING & SIZING ---
+        // 1. Mobile (Default): 
+        //    - w-[85%] h-[60%] -> Matches your request for specific sizing
+        //    - p-[20px] -> Minimum padding
+        // 2. Desktop (md+):
+        //    - Reverts to your specific fixed positioning if desired, OR
+        //    - We can keep the centered look but make it larger.
+        //    - Below I kept your original 'md:' overrides to switch to fixed positioning on larger screens.
+        className="bg-[#1d1836] rounded-2xl border border-white/10 shadow-card flex flex-col
+                   w-[85%] h-[60%] p-[20px]
+                   md:fixed md:w-auto md:h-auto md:inset-auto
+                   md:top-[15%] md:bottom-[18%] md:left-[15%] md:right-[10%] md:p-8"
       >
         
         {/* Close Button */}
@@ -40,9 +51,10 @@ const GlobalModal = ({ isOpen, onClose, type, data }) => {
         </div>
 
         {/* --- BODY CONTENT (Scrollable) --- */}
-        <div className="text-secondary text-[16px] leading-[30px] overflow-y-auto pr-2 custom-scrollbar">
+        {/* 'flex-1' makes this fill the remaining height. 'overflow-y-auto' handles scrolling. */}
+        <div className="flex-1 text-secondary text-[16px] leading-[30px] overflow-y-auto pr-2 custom-scrollbar">
           
-          {/* CASE 1: LEGAL (Privacy Policy / Terms) */}
+          {/* CASE 1: LEGAL */}
           {type === "legal" && data && (
             <div className="space-y-4">
               <p className="text-sm text-gray-400 border-b border-white/10 pb-2">
@@ -70,7 +82,6 @@ const GlobalModal = ({ isOpen, onClose, type, data }) => {
               <p>Role: <span className="text-white">{data?.roles}</span></p>
 
               <div className="mt-5 p-5 bg-black-100 rounded-xl border border-white/5 min-h-[200px] flex items-center justify-center">
-                 {/* Logic for showing specific resume template */}
                  <span className="text-gray-500">
                     [Template Content for key: {data?.modelKey}]
                  </span>
@@ -78,7 +89,7 @@ const GlobalModal = ({ isOpen, onClose, type, data }) => {
             </div>
           )}
           
-          {/* CASE 3: COMING SOON / LOADING */}
+          {/* CASE 3: COMING SOON */}
           {data?.isComingSoon && (
              <div className="flex flex-col items-center justify-center py-10 gap-4">
                 <div className="bg-yellow-500 text-black px-4 py-1 rounded-full text-sm font-bold shadow-lg shadow-yellow-500/20">

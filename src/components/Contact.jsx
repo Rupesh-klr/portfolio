@@ -13,18 +13,16 @@ const ServiceToggle = ({ method, setMethod }) => (
     <button
       type="button"
       onClick={() => setMethod("emailjs")}
-      className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 ${
-        method === "emailjs" ? "bg-purple-600 text-white shadow-lg" : "text-secondary hover:text-white"
-      }`}
+      className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 ${method === "emailjs" ? "bg-purple-600 text-white shadow-lg" : "text-secondary hover:text-white"
+        }`}
     >
       EmailJS
     </button>
     <button
       type="button"
       onClick={() => setMethod("formsubmit")}
-      className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 ${
-        method === "formsubmit" ? "bg-green-600 text-white shadow-lg" : "text-secondary hover:text-white"
-      }`}
+      className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 ${method === "formsubmit" ? "bg-green-600 text-white shadow-lg" : "text-secondary hover:text-white"
+        }`}
     >
       FormSubmit.co
     </button>
@@ -32,7 +30,7 @@ const ServiceToggle = ({ method, setMethod }) => (
 );
 
 const InputField = ({ label, name, type = "text", placeholder, value, onChange }) => (
-  <motion.label 
+  <motion.label
     className="flex flex-col gap-2"
     initial={{ opacity: 0, x: -20 }}
     whileInView={{ opacity: 1, x: 0 }}
@@ -53,12 +51,12 @@ const InputField = ({ label, name, type = "text", placeholder, value, onChange }
 
 const Contact = () => {
   const formRef = useRef();
-  
+
   // --- STATE ---
   const [submissionMethod, setSubmissionMethod] = useState("emailjs");
   const [loading, setLoading] = useState(false);
   const [showFallback, setShowFallback] = useState(false);
-  
+
   // Initialize Queue from Local Storage
   const [failedQueue, setFailedQueue] = useState(() => {
     const saved = localStorage.getItem("failed_requests");
@@ -92,12 +90,12 @@ const Contact = () => {
 
   // --- QUEUE MANAGEMENT ---
   const addToFailedQueue = (data) => {
-    const newEntry = { 
-      ...data, 
-      id: Date.now(), 
+    const newEntry = {
+      ...data,
+      id: Date.now(),
       systemInfo: getSystemInfo() // Storing hidden metadata
     };
-    
+
     setFailedQueue((prev) => {
       const updated = [newEntry, ...prev].slice(0, 10); // Keep last 10
       return updated;
@@ -115,7 +113,7 @@ const Contact = () => {
   const handleMailto = (data) => {
     const subject = encodeURIComponent(`Portfolio Query: ${data.title} - ${data.name}`);
     const body = encodeURIComponent(
-`Hi Rupesh,
+      `Hi Rupesh,
 
 (System Info: ${data.systemInfo?.platform || 'Unknown'})
 
@@ -137,7 +135,7 @@ ${data.message}`
   const handleRetryApi = async (data) => {
     setLoading(true);
     // Use the component's main submit logic logic, but with passed data
-    await executeSubmission(data, true); 
+    await executeSubmission(data, true);
     setLoading(false);
   };
 
@@ -149,11 +147,16 @@ ${data.message}`
       ...data,
       system_details: getSystemInfo()
     };
-    
+
     console.log("🚀 Prepared Payload:", hiddenPayload); // Hidden log for debugging
 
     try {
       if (submissionMethod === "emailjs") {
+        console.log("DEBUG KEYS:", {
+          service: import.meta.env.VITE_APP_EMAILJS_SERVICE_ID,
+          template: import.meta.env.VITE_APP_EMAILJS_TEMPLATE_ID,
+          key: import.meta.env.VITE_APP_EMAILJS_PUBLIC_KEY // This is likely 'undefined'
+        });
         await emailjs.send(
           import.meta.env.VITE_APP_EMAILJS_SERVICE_ID,
           import.meta.env.VITE_APP_EMAILJS_TEMPLATE_ID,
@@ -185,7 +188,7 @@ ${data.message}`
       }
 
       alert("Message Sent Successfully!");
-      
+
       if (isRetry && data.id) {
         removeFromQueue(data.id); // Remove from queue if retry works
       } else {
@@ -196,7 +199,7 @@ ${data.message}`
       console.error("Submission Failed:", error);
       if (!isRetry) addToFailedQueue(data); // Only add to queue if it's a fresh fail
       else alert("Retry failed again. Please use the Email button.");
-      
+
       if (!showFallback) setShowFallback(true);
     }
   };
@@ -210,18 +213,18 @@ ${data.message}`
 
   return (
     <div className={`xl:mt-12 flex xl:flex-row flex-col-reverse gap-10 overflow-hidden relative min-w-[320px]`}>
-      
+
       {/* --- FALLBACK / HISTORY MODAL --- */}
       <AnimatePresence>
         {showFallback && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             className="fixed inset-0 z-[999] flex items-center justify-center bg-black/90 backdrop-blur-md p-4"
           >
             <div className="bg-[#1d1836] p-6 rounded-2xl border border-white/10 max-w-2xl w-full shadow-2xl flex flex-col max-h-[85vh]">
-              
+
               <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-4">
                 <h3 className="text-xl font-bold text-white flex items-center gap-2">
                   💾 Pending Requests ({failedQueue.length})
@@ -243,23 +246,23 @@ ${data.message}`
                         <span className="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded">Failed</span>
                       </div>
                       <p className="text-sm text-gray-300 truncate mb-4">{item.message}</p>
-                      
+
                       {/* DUAL ACTION BUTTONS */}
                       <div className="flex gap-3">
-                        <button 
+                        <button
                           onClick={() => handleRetryApi(item)}
                           disabled={loading}
                           className="flex-1 bg-purple-600 hover:bg-purple-500 text-white text-sm py-2 rounded-lg font-medium transition-colors"
                         >
                           {loading ? "Retrying..." : "🔄 Retry Server"}
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleMailto(item)}
                           className="flex-1 bg-green-600 hover:bg-green-500 text-white text-sm py-2 rounded-lg font-medium transition-colors"
                         >
                           📧 Open Mail App
                         </button>
-                        <button 
+                        <button
                           onClick={() => removeFromQueue(item.id)}
                           className="px-3 text-gray-500 hover:text-red-400"
                           title="Delete"
@@ -284,23 +287,23 @@ ${data.message}`
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-purple-600 rounded-full mix-blend-screen filter blur-[80px] opacity-20 pointer-events-none"></div>
 
         <div className="flex justify-between items-center mb-4">
-           <div>
-             <p className={styles.sectionSubText}>Get in touch</p>
-             <h3 className={styles.sectionHeadText}>Contact.</h3>
-           </div>
-           
-           {/* HISTORY BUTTON */}
-           <button 
-             onClick={() => setShowFallback(true)}
-             className="text-xs flex items-center gap-1 text-gray-400 hover:text-white transition-colors border border-white/10 px-3 py-1.5 rounded-full"
-           >
-             <span>📂</span> Pending: {failedQueue.length}
-           </button>
+          <div>
+            <p className={styles.sectionSubText}>Get in touch</p>
+            <h3 className={styles.sectionHeadText}>Contact.</h3>
+          </div>
+
+          {/* HISTORY BUTTON */}
+          <button
+            onClick={() => setShowFallback(true)}
+            className="text-xs flex items-center gap-1 text-gray-400 hover:text-white transition-colors border border-white/10 px-3 py-1.5 rounded-full"
+          >
+            <span>📂</span> Pending: {failedQueue.length}
+          </button>
         </div>
 
         <div className="mt-2">
-           <span className="text-secondary text-xs mb-2 block">Select Service Provider:</span>
-           <ServiceToggle method={submissionMethod} setMethod={setSubmissionMethod} />
+          <span className="text-secondary text-xs mb-2 block">Select Service Provider:</span>
+          <ServiceToggle method={submissionMethod} setMethod={setSubmissionMethod} />
         </div>
 
         <form ref={formRef} onSubmit={handleSubmit} className="mt-6 flex flex-col gap-6">
@@ -309,8 +312,8 @@ ${data.message}`
             <InputField label="Full Name" name="name" placeholder="What's your name?" value={form.name} onChange={handleChange} />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-             <InputField label="Short Intro" name="intro" placeholder="One liner about you" value={form.intro} onChange={handleChange} />
-             <InputField label="Phone Number" name="phone" type="tel" placeholder="+91 000..." value={form.phone} onChange={handleChange} />
+            <InputField label="Short Intro" name="intro" placeholder="One liner about you" value={form.intro} onChange={handleChange} />
+            <InputField label="Phone Number" name="phone" type="tel" placeholder="+91 000..." value={form.phone} onChange={handleChange} />
           </div>
           <InputField label="Email Address" name="email" type="email" placeholder="email@address.com" value={form.email} onChange={handleChange} />
           <motion.label className="flex flex-col gap-2">

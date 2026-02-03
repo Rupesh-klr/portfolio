@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import MyDetailsComponent from "./MyDetailsComponent";
+import MyDetailsComponent from "./MyDetailsComponent"; // Ensure path is correct
 
 import { styles } from "../styles";
 import { navLinks, aboutData } from "../constants";
@@ -11,39 +11,32 @@ const Navbar = ({ onOpenModal }) => {
   const [active, setActive] = useState("");
   const [toggle, setToggle] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [activeModal, setActiveModal] = useState(null); // 'my-details-compunetent' or null
+  const [activeModal, setActiveModal] = useState(null);
+
   const handleNavClick = (nav) => {
-    console.log("Clicked nav:", nav);
     if (nav.navModelItem && nav.modelType === "my-details-compunetent") {
       setActiveModal(nav.modelType);
-    } else {
-      // Handle standard scrolling...
     }
   };
 
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY;
-      if (scrollTop > 100) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
+      setScrolled(scrollTop > 100);
     };
-
     window.addEventListener("scroll", handleScroll);
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <>
       <nav
-        className={`${styles.paddingX
-          } w-full flex items-center py-5 fixed top-0 z-20 ${scrolled ? "bg-primary" : "bg-transparent"
-          }`}
+        className={`${styles.paddingX} w-full flex items-center py-5 fixed top-0 z-20 ${
+          scrolled ? "bg-primary" : "bg-transparent"
+        }`}
       >
         <div className='w-full flex justify-between items-center max-w-7xl mx-auto'>
+          {/* LOGO */}
           <Link
             to='/'
             className='flex items-center gap-2'
@@ -58,29 +51,25 @@ const Navbar = ({ onOpenModal }) => {
               <span className='sm:block hidden'> | Full Stack DevOps Engineer</span>
             </p>
           </Link>
+
           <ThemeToggle />
 
+          {/* DESKTOP NAV (Hidden on Mobile) */}
           <ul className='list-none hidden sm:flex flex-row gap-10'>
-            {/* Desktop Navigation */}
             {navLinks.map((nav) => (
               <li
                 key={nav.id}
-                className={`${active === nav.title ? "text-white" : "text-secondary"
-                  } hover:text-white text-[18px] font-medium cursor-pointer relative group`}
+                className={`${
+                  active === nav.title ? "text-white" : "text-secondary"
+                } hover:text-white text-[18px] font-medium cursor-pointer relative group`}
                 onClick={() => setActive(nav.title)}
               >
                 {nav.navModelItem ? (
                   <span
                     className="hover:text-yellow text-[16px] font-medium block"
                     onClick={(e) => {
-                      e.preventDefault(); // Stop page jump
+                      e.preventDefault();
                       handleNavClick(nav);
-                      // Send data UP to App.jsx
-                      // onOpenModal(
-                      //   nav.modelType, 
-                      //   nav.modelKey, 
-                      //   nav.modelData
-                      // );
                     }}
                   >
                     {nav.title}
@@ -88,7 +77,8 @@ const Navbar = ({ onOpenModal }) => {
                 ) : (
                   <a href={`#${nav.id}`}>{nav.title}</a>
                 )}
-                {/* Dropdown Menu (Appears on Group Hover) */}
+
+                {/* Desktop Dropdown */}
                 {nav.children && (
                   <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-[#1d1836] rounded-xl shadow-card p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top z-50">
                     <div className="flex flex-col gap-4">
@@ -99,16 +89,9 @@ const Navbar = ({ onOpenModal }) => {
                           target={child.external ? "_blank" : "_self"}
                           className="text-secondary hover:text-white text-[16px] font-medium block"
                           onClick={(e) => {
-                            // Check if this item is a "Model Item"
                             if (child.modelItem) {
-                              e.preventDefault(); // Stop page jump
-
-                              // Send data UP to App.jsx
-                              onOpenModal(
-                                child.modelType,
-                                child.modelKey,
-                                child.modelData
-                              );
+                              e.preventDefault();
+                              onOpenModal(child.modelType, child.modelKey, child.modelData);
                             } else if (!child.external) {
                               setActive(nav.title);
                             }
@@ -124,7 +107,7 @@ const Navbar = ({ onOpenModal }) => {
             ))}
           </ul>
 
-          {/* Mobile Menu Toggle (Simplified) */}
+          {/* MOBILE MENU TOGGLE */}
           <div className='sm:hidden flex flex-1 justify-end items-center'>
             <img
               src={toggle ? close : menu}
@@ -134,24 +117,22 @@ const Navbar = ({ onOpenModal }) => {
             />
 
             <div
-              className={`${!toggle ? "hidden" : "flex"
-                } p-6 black-gradient absolute top-20 right-0 mx-4 my-2 min-w-[140px] z-10 rounded-xl`}
+              className={`${
+                !toggle ? "hidden" : "flex"
+              } p-6 pb-14 black-gradient absolute top-20 right-0 mx-4 my-2 min-w-[140px] z-10 rounded-xl max-h-[80vh] overflow-y-auto custom-scrollbar shadow-card`}
             >
-              <ul className='list-none flex justify-end items-start flex-1 flex-col gap-4'>
+              {/* --- CRITICAL FIX HERE: Changed 'justify-end' to 'justify-start' --- */}
+              <ul className='list-none flex justify-start items-start flex-1 flex-col gap-4'>
                 {navLinks.map((nav) => (
                   <li
                     key={nav.id}
                     className={`font-poppins font-medium cursor-pointer text-[16px] w-full`}
                   >
-                    {/* CHECK: Does this item have children (Dropdown)? */}
                     {nav.children ? (
                       <div className="flex flex-col gap-2">
-                        {/* Parent Title (Acts as a Header) */}
                         <span className="text-white/50 text-[12px] uppercase tracking-wider font-bold">
                           {nav.title}
                         </span>
-
-                        {/* Children Links (Indented) */}
                         <ul className="flex flex-col gap-3 pl-3 border-l-2 border-white/10">
                           {nav.children.map((child) => (
                             <li key={child.id}>
@@ -160,20 +141,12 @@ const Navbar = ({ onOpenModal }) => {
                                 target={child.external ? "_blank" : "_self"}
                                 className="text-secondary hover:text-white block"
                                 onClick={() => {
-                                  setToggle(!toggle); // Close menu
-                                  // Check if this item is a "Model Item"
+                                  setToggle(!toggle);
                                   if (child.modelItem) {
-                                    // e.preventDefault(); // Stop page jump
-                                    // Send data UP to App.jsx
-                                    onOpenModal(
-                                      child.modelType,
-                                      child.modelKey,
-                                      child.modelData
-                                    );
+                                    onOpenModal(child.modelType, child.modelKey, child.modelData);
                                   } else if (!child.external) {
                                     setActive(nav.title);
                                   }
-                                  setActive(nav.title); // Set Active State
                                 }}
                               >
                                 {child.title}
@@ -183,39 +156,33 @@ const Navbar = ({ onOpenModal }) => {
                         </ul>
                       </div>
                     ) : (
-                      /* STANDARD LINK (No Dropdown) */
                       <>
                         {nav?.navModelItem ? (
                           <span
                             className="hover:text-yellow text-[16px] font-medium block"
                             onClick={(e) => {
-                              e.preventDefault(); // Stop page jump
+                              e.preventDefault();
+                              setToggle(!toggle);
                               handleNavClick(nav);
-                              // Send data UP to App.jsx
-                              // onOpenModal(
-                              //   nav.modelType, 
-                              //   nav.modelKey, 
-                              //   nav.modelData
-                              // );
                             }}
                           >
                             {nav.title}
                           </span>
-                        ) : (<a
-                          href={`#${nav.id}`}
-                          className={`${active === nav.title ? "text-white" : "text-secondary"
+                        ) : (
+                          <a
+                            href={`#${nav.id}`}
+                            className={`${
+                              active === nav.title ? "text-white" : "text-secondary"
                             }`}
-                          onClick={() => {
-                            setToggle(!toggle);
-                            setActive(nav.title);
-                          }}
-                        >
-                          {nav.title}
-                        </a>
-                          // <a href={`#${nav.id}`}>{nav.title}</a>
+                            onClick={() => {
+                              setToggle(!toggle);
+                              setActive(nav.title);
+                            }}
+                          >
+                            {nav.title}
+                          </a>
                         )}
                       </>
-
                     )}
                   </li>
                 ))}
@@ -224,27 +191,30 @@ const Navbar = ({ onOpenModal }) => {
           </div>
         </div>
       </nav>
-      {/* --- MODAL OVERLAY --- */}
+
+      {/* --- GLOBAL MODAL (Updated with Responsive Fix) --- */}
       {activeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-4xl">
-            <h1>helllo</h1>
-
-            <button
-              onClick={() => setActiveModal(null)}
-              className="absolute -top-12 right-0 text-white text-xl font-bold bg-white/10 px-4 py-2 rounded-full hover:bg-white/20 transition-all"
-            >
-              ✕ Close
-            </button>
-
-            {/* --- CONDITIONAL RENDERING --- */}
-            {activeModal === "my-details-compunetent" && (
-              <MyDetailsComponent data={aboutData} />
-            )}
-
-            {/* You can add other modal types here (e.g., legal) */}
-            {/* {activeModal === "legal" && <LegalComponent />} */}
-
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm">
+           <div 
+             className="fixed bg-[#1d1836] p-8 rounded-2xl border border-white/10 shadow-card flex flex-col inset-4 md:top-[15%] md:bottom-[18%] md:left-[15%] md:right-[10%]"
+           >
+            {/* Header / Close */}
+            <div className="relative mb-4">
+               <h1 className="text-2xl font-bold text-white">Details</h1>
+               <button
+                  onClick={() => setActiveModal(null)}
+                  className="absolute -top-2 right-0 text-white text-lg font-bold bg-white/10 px-3 py-1 rounded-full hover:bg-white/20 transition-all"
+                >
+                  ✕ Close
+                </button>
+            </div>
+            
+            {/* Scrollable Body */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+              {activeModal === "my-details-compunetent" && (
+                <MyDetailsComponent data={aboutData} />
+              )}
+            </div>
           </div>
         </div>
       )}
